@@ -10,22 +10,21 @@ services:
     container_name: nginx
     ports:
       - "${NGINX_PORT}:80"
+      - "443:443"
     volumes:
       - ./projects:/var/www
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/logs:/var/log/nginx/
+      - ./nginx/ssl:/etc/ssl/
     depends_on:
-      - php-7.1
-      - php-7.3
-      - mysql-8
-      - mysql-5.7
+      - php
+      - mysql
       - redis
-      - mongo
-      - postgres
     environment:
       TZ: ${WORKSPACE_TIMEZONE}
     networks:
       - backend
+    restart: unless-stopped
 
   redis:
     image: redis:latest
@@ -40,38 +39,19 @@ services:
     networks:
       - backend
 
-  mysql-5.7:
-    image: mysql:5.7
-    container_name: mysql-5.7
-    restart: unless-stopped
-    volumes:
-      - ./mysql-5.7/data:/var/lib/mysql
-      - ./mysql-5.7/conf.d:/etc/mysql/conf.d
-      - ./mysql-5.7/logs:/var/log/mysql/
-      - ./mysql-5.7/dump:/dump
-    ports:
-      - "${MYSQL_5_7_PORT}:3306"
-    security_opt:
-      - seccomp:unconfined
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      TZ: ${WORKSPACE_TIMEZONE}
-    networks:
-      - backend
-
-  mysql-8:
+  mysql:
     image: mysql:8.0.21
     command: --default-authentication-plugin=mysql_native_password --skip_name_resolve
-    container_name: mysql-8
+    hostname: mysql
+    container_name: mysql
     restart: unless-stopped
     volumes:
-      - ./mysql-8/data:/var/lib/mysql
-      - ./mysql-8/conf.d:/etc/mysql/conf.d
-      - ./mysql-8/logs:/var/log/mysql/
-      - ./mysql-8/dump:/dump
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/logs:/var/log/mysql/
+      - ./mysql/dump:/dump
     ports:
-      - "${MYSQL_8_PORT}:3306"
+      - "3306:3306"
     security_opt:
       - seccomp:unconfined
     environment:
@@ -81,103 +61,68 @@ services:
     networks:
       - backend
 
-  postgres:
-    image: postgres:alpine
-    volumes:
-      - ./postgres/data:/var/lib/postgresql/data
-      - ./postgres/dump:/dump
-    ports:
-      - "${POSTGRES_PORT}:5432"
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      TZ: ${WORKSPACE_TIMEZONE}
-    networks:
-        - backend
-    container_name: postgres
-
-  mongo:
-    image: mongo:4.2
-    ports:
-      - "${MONGO_PORT}:27017"
-    volumes:
-      - ./mongo/db:/data/db
-      - ./mongo/configdb:/data/configdb
-      - ./mongo/dump:/dump
-    environment:
-      TZ: ${WORKSPACE_TIMEZONE}
-    networks:
-      - backend
-    container_name: mongo
-
-  php-8.0:
+  php:
     build:
-      context: php-8-workspace
+      context: php-workspace
       dockerfile: Dockerfile
       args:
         DOCKER_PHP_VERSION: '8.0'
         TZ: ${WORKSPACE_TIMEZONE}
     working_dir: /var/www
-    container_name: php-8.0
+    container_name: php
     volumes:
       - ./.ssh:/home/www-data/.ssh
       - ./projects:/var/www
-      - ./php-ini/8.0/php.ini:/usr/local/etc/php/php.ini
-      - ./php-workers/8.0/supervisor.d:/etc/supervisor.d
+      - ./php-ini/php.ini:/usr/local/etc/php/php.ini
+      - ./php-workers/supervisor.d:/etc/supervisor.d
     ports:
       - "${PHP_8_0_PORT}:9000"
     networks:
       - backend
+    restart: unless-stopped
     extra_hosts:
-      - 'project-1.localhost:192.168.65.2'
-      - 'project-2.localhost:192.168.65.2'
-      - 'project-3.localhost:192.168.65.2'
+      - 'opensearch:host-gateway'
+      - 'rabbitmq:host-gateway'
+      - 'mysql-8:host-gateway'
 
-  php-7.3:
-    build:
-      context: php-7-workspace
-      dockerfile: Dockerfile
-      args:
-        DOCKER_PHP_VERSION: '7.3'
-        DOCKER_PHP_ENABLE_XDEBUG: ${DOCKER_PHP_ENABLE_XDEBUG}
-        TZ: ${WORKSPACE_TIMEZONE}
-    working_dir: /var/www
-    container_name: php-7.3
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    hostname: opensearch
+    container_name: opensearch
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node
+      - discovery.seed_hosts=opensearch-node
+      - cluster.initial_cluster_manager_nodes=opensearch-node
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - plugins.security.ssl.http.enabled=false
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     volumes:
-      - ./.ssh:/home/www-data/.ssh
-      - ./projects:/var/www
-      - ./php-ini/7.3/php.ini:/usr/local/etc/php/php.ini
-      - ./php-workers/7.3/supervisor.d:/etc/supervisor.d
+      - ./opensearch/data:/usr/share/opensearch/data
+      - ./opensearch/config:/usr/share/opensearch/config
     ports:
-      - "${PHP_7_3_PORT}:9000"
+      - "9200:9200"
+      - "9600:9600" # required for Performance Analyzer
     networks:
       - backend
-    extra_hosts:
-      - 'project-1.localhost:192.168.65.2'
-      - 'project-2.localhost:192.168.65.2'
-      - 'project-3.localhost:192.168.65.2'
+    restart: unless-stopped
 
-  php-7.1:
-    build:
-      context: php-7-workspace
-      dockerfile: Dockerfile
-      args:
-        DOCKER_PHP_VERSION: '7.1'
-        DOCKER_PHP_ENABLE_XDEBUG: ${DOCKER_PHP_ENABLE_XDEBUG}
-        TZ: ${WORKSPACE_TIMEZONE}
-    working_dir: /var/www
-    container_name: php-7.1
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    hostname: rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=rmuser
+      - RABBITMQ_DEFAULT_PASS=rmpassword
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error},{default,error}] disk_free_limit 2147483648
     volumes:
-      - ./.ssh:/home/www-data/.ssh
-      - ./projects:/var/www
-      - ./php-ini/7.1/php.ini:/usr/local/etc/php/php.ini
-      - ./php-workers/7.1/supervisor.d:/etc/supervisor.d
+      - ./rabbitmq:/var/lib/rabbitmq
     ports:
-      - "${PHP_7_1_PORT}:9000"
+      - "15672:15672"
+      - "5672:5672"
     networks:
       - backend
-    extra_hosts:
-      - 'project-1.localhost:192.168.65.2'
-      - 'project-2.localhost:192.168.65.2'
-      - 'project-3.localhost:192.168.65.2'
