@@ -16,7 +16,7 @@ RUN apk add --no-cache bash mysql-client msmtp perl wget procps shadow libzip li
 
 RUN apk add --update --no-cache --virtual build-essentials \
     icu-dev icu-libs zlib-dev g++ make automake autoconf libzip-dev \
-    htop supervisor nodejs npm \
+    nodejs npm \
     libpng-dev libwebp-dev libjpeg-turbo-dev freetype-dev && \
     docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp && \
     docker-php-ext-configure gettext && \
@@ -38,8 +38,16 @@ RUN apk add --update --no-cache --virtual build-essentials \
     docker-php-ext-install opcache && \
     docker-php-ext-install exif && \
     docker-php-ext-install zip && \
-    docker-php-ext-install sockets && \
     apk del build-essentials && rm -rf /usr/src/php*
+
+RUN apk add --no-cache supervisor htop tesseract-ocr
+
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/rus.traineddata && \
+    cp rus.traineddata /usr/share/tessdata/rus.traineddata
+
+RUN mkdir -p /var/log/supervisor
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
 RUN apk add --no-cache $PHPIZE_DEPS
 RUN pecl install -o -f redis mongodb \
@@ -56,6 +64,7 @@ RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
 RUN /usr/local/bin/composer self-update
 
-USER www-data:www-data
+USER www-data
 
 WORKDIR /var/www/
+

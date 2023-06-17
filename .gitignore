@@ -30,3 +30,9 @@
 # Другие файлы
 .idea/
 .DS_Store
+/nginx/ssl/
+/nginx/conf.d/
+/mysql/data/
+/mysql/logs/
+/opensearch/data/
+/php-workers/supervisord.log
