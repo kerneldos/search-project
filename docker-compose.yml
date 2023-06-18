@@ -19,7 +19,6 @@ services:
     depends_on:
       - php
       - mysql
-      - redis
     environment:
       TZ: ${WORKSPACE_TIMEZONE}
     networks:
@@ -70,7 +69,7 @@ services:
     extra_hosts:
       - 'opensearch:host-gateway'
       - 'rabbitmq:host-gateway'
-      - 'mysql-8:host-gateway'
+      - 'mysql:host-gateway'
     user: ${CURRENT_UID}
 
   opensearch:

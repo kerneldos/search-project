@@ -36,3 +36,4 @@
 /mysql/logs/
 /opensearch/data/
 /php-workers/supervisord.log
+/rabbitmq/
