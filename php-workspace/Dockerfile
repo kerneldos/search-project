@@ -49,6 +49,11 @@ RUN mkdir -p /var/log/supervisor
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
+RUN apk add $PHPIZE_DEPS libsmbclient samba-dev
+RUN pecl install smbclient
+RUN docker-php-ext-enable smbclient
+RUN php --ri smbclient
+
 RUN apk add --no-cache $PHPIZE_DEPS
 RUN pecl install -o -f redis mongodb \
     &&  rm -rf /tmp/pear \
