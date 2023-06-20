@@ -38,13 +38,14 @@ RUN apk add --update --no-cache --virtual build-essentials \
     docker-php-ext-install opcache && \
     docker-php-ext-install exif && \
     docker-php-ext-install zip && \
-    docker-php-ext-install sockets \
     apk del build-essentials && rm -rf /usr/src/php*
 
 RUN apk add --no-cache supervisor htop tesseract-ocr
 
 RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/rus.traineddata && \
     cp rus.traineddata /usr/share/tessdata/rus.traineddata
+
+RUN docker-php-ext-install sockets
 
 RUN mkdir -p /var/log/supervisor
 
