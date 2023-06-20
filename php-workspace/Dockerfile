@@ -40,7 +40,8 @@ RUN apk add --update --no-cache --virtual build-essentials \
     docker-php-ext-install zip && \
     apk del build-essentials && rm -rf /usr/src/php*
 
-RUN apk add --update --no-cache gzip tar wget \
+
+RUN apk add --update --no-cache --virtual build-essentials gzip tar wget \
     docker-php-ext-install sockets
 
 RUN apk add --no-cache supervisor htop tesseract-ocr
