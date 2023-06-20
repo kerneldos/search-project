@@ -38,11 +38,8 @@ RUN apk add --update --no-cache --virtual build-essentials \
     docker-php-ext-install opcache && \
     docker-php-ext-install exif && \
     docker-php-ext-install zip && \
+    docker-php-ext-install sockets && \
     apk del build-essentials && rm -rf /usr/src/php*
-
-COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
-
-RUN install-php-extensions sockets
 
 RUN apk add --no-cache supervisor htop tesseract-ocr
 
