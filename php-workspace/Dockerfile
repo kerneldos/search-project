@@ -40,6 +40,9 @@ RUN apk add --update --no-cache --virtual build-essentials \
     docker-php-ext-install zip && \
     apk del build-essentials && rm -rf /usr/src/php*
 
+RUN apk add --update --no-cache gzip tar wget \
+    docker-php-ext-install sockets
+
 RUN apk add --no-cache supervisor htop tesseract-ocr
 
 RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/rus.traineddata && \
@@ -64,8 +67,6 @@ RUN pecl install -o -f redis mongodb \
 RUN rm -rf /var/cache/apk/* && docker-php-source delete
 
 USER root
-
-RUN docker-php-ext-install sockets
 
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
