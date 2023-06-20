@@ -45,8 +45,6 @@ RUN apk add --no-cache supervisor htop tesseract-ocr
 RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/rus.traineddata && \
     cp rus.traineddata /usr/share/tessdata/rus.traineddata
 
-RUN docker-php-ext-install sockets
-
 RUN mkdir -p /var/log/supervisor
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
@@ -66,6 +64,8 @@ RUN pecl install -o -f redis mongodb \
 RUN rm -rf /var/cache/apk/* && docker-php-source delete
 
 USER root
+
+RUN docker-php-ext-install sockets
 
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
