@@ -61,6 +61,9 @@ RUN pecl install -o -f redis mongodb \
     &&  docker-php-ext-enable redis \
     &&  docker-php-ext-enable mongodb
 
+RUN pecl install rar && \
+    docker-php-ext-enable rar
+
 # Clean
 RUN rm -rf /var/cache/apk/* && docker-php-source delete
 
