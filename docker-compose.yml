@@ -123,11 +123,12 @@ services:
       dockerfile: Dockerfile
     working_dir: /usr/src/app
     container_name: python
+    hostname: ai
     volumes:
       - ./.ssh:/home/www-data/.ssh
-      - ./projects:/usr/src/app
+      - ./projects/langchain-search:/usr/src/app
     ports:
-      - "${PYTHON_3_11_PORT}:8000"
+      - "${PYTHON_3_11_PORT}:80"
     networks:
       - backend
     restart: unless-stopped
