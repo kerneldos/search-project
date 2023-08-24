@@ -16,7 +16,11 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/logs:/var/log/nginx/
       - ./nginx/ssl:/etc/ssl/
-      - /etc/letsencrypt/live:/etc/letsencrypt/live
+      - type: bind
+        source: /etc/letsencrypt/live
+        target: /etc/letsencrypt/live
+        bind:
+          create_host_path: true
     depends_on:
       - python
       - php
