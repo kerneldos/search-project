@@ -16,6 +16,7 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/logs:/var/log/nginx/
       - ./nginx/ssl:/etc/ssl/
+      - /etc/letsencrypt/live:/etc/letsencrypt/live
     depends_on:
       - python
       - php
