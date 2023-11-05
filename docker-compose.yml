@@ -62,6 +62,8 @@ services:
       - ./projects:/var/www
       - ./php-ini/php.ini:/usr/local/etc/php/php.ini
       - ./php-workers:/etc/supervisor
+    depends_on:
+      - rabbitmq
     ports:
       - "${PHP_8_0_PORT}:9000"
     networks:
