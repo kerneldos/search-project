@@ -139,3 +139,17 @@ services:
       - 'rabbitmq:host-gateway'
       - 'mysql:host-gateway'
     user: ${CURRENT_UID}
+
+  tika:
+    build:
+      context: tika-workspace
+      dockerfile: Dockerfile
+      args:
+        TIKA_VERSION: '2.9.1'
+    container_name: tika
+    hostname: tika.local
+    ports:
+      - "9998:9998"
+    networks:
+      - backend
+    user: ${CURRENT_UID}
