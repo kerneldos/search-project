@@ -148,8 +148,17 @@ services:
         TIKA_VERSION: '2.9.1'
     container_name: tika
     hostname: tika.local
+    restart: unless-stopped
     ports:
       - "9998:9998"
     networks:
       - backend
     user: ${CURRENT_UID}
+
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice
+    environment:
+      - ASR_MODEL=base
+      - ASR_ENGINE=openai_whisper
+    ports:
+      - "9007:9000"
