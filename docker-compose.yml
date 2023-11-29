@@ -100,7 +100,6 @@ services:
     networks:
       - backend
     restart: unless-stopped
-    user: ${CURRENT_UID}
 
   rabbitmq:
     image: rabbitmq:3.10.7-management
