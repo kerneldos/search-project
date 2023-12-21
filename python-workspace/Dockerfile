@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y g++
 
 RUN pip install --no-cache-dir --upgrade pip
 
-RUN pip install --no-cache-dir gunicorn flask chromadb==0.3.29 langchain openai tiktoken
+RUN pip install --no-cache-dir gunicorn flask langchain openai
 
 COPY . .
 

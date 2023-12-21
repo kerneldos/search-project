@@ -37,3 +37,5 @@
 /opensearch/data/
 /php-workers/supervisord.log
 /rabbitmq/
+/php-workers/conf.d/*.local.conf
+/certbot/conf/

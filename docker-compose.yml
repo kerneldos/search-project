@@ -16,6 +16,8 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/logs:/var/log/nginx/
       - ./nginx/ssl:/etc/ssl/
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
     depends_on:
       - python
       - php
@@ -25,6 +27,13 @@ services:
     networks:
       - backend
     restart: unless-stopped
+
+  certbot:
+    image: ramosisw/cerbot
+    container_name: certbot
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
 
   mysql:
     image: mysql:8.0.21
@@ -60,7 +69,6 @@ services:
     volumes:
       - ./.ssh:/home/www-data/.ssh
       - ./projects:/var/www
-      - ./php-ini/php.ini:/usr/local/etc/php/php.ini
       - ./php-workers:/etc/supervisor
     depends_on:
       - rabbitmq
