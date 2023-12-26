@@ -70,6 +70,7 @@ services:
       - ./.ssh:/home/www-data/.ssh
       - ./projects:/var/www
       - ./php-workers:/etc/supervisor
+      - ./php-workers/8.0/php.local.ini:/usr/local/etc/php/php.ini
     depends_on:
       - rabbitmq
     ports:
