@@ -10,41 +10,49 @@ RUN echo "${TZ}" && apk --update add tzdata && \
     echo $TZ > /etc/timezone && \
     apk del tzdata
 
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
 RUN apk add --no-cache bash mysql-client msmtp perl wget procps shadow libzip libpng libjpeg-turbo libwebp freetype icu \
     libintl patch acl git gettext-dev libcurl libxml2-dev openssh-client pcre-dev su-exec build-base oniguruma-dev \
     gmp-dev postgresql-dev gettext gettext-dev
+
+RUN install-php-extensions \
+    soap \
+    zip \
+    curl \
+    bcmath \
+    exif \
+    gd \
+    iconv \
+    intl \
+    mbstring \
+    opcache \
+    pdo_pgsql \
+    imagick \
+    mongodb \
+    xdebug \
+    memcached \
+    amqp \
+    redis \
+    json
+
 
 RUN apk add --update --no-cache --virtual build-essentials \
     icu-dev icu-libs zlib-dev g++ make automake autoconf libzip-dev \
     nodejs npm \
     libpng-dev libwebp-dev libjpeg-turbo-dev freetype-dev && \
-    docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp && \
     docker-php-ext-configure gettext && \
-    docker-php-ext-configure opcache --enable-opcache && \
     docker-php-ext-configure pcntl --enable-pcntl && \
-    docker-php-ext-configure soap && \
-    docker-php-ext-configure intl && \
-    docker-php-ext-install intl && \
     docker-php-ext-install gettext && \
     docker-php-ext-install pcntl && \
-    docker-php-ext-install gd && \
-    docker-php-ext-install opcache && \
-    docker-php-ext-install soap && \
     docker-php-ext-install xml && \
     docker-php-ext-install gmp && \
-    docker-php-ext-install pdo_pgsql && \
     docker-php-ext-install mysqli && \
     docker-php-ext-install pdo_mysql && \
-    docker-php-ext-install opcache && \
-    docker-php-ext-install exif && \
-    docker-php-ext-install zip && \
     docker-php-ext-install sockets && \
     apk del build-essentials && rm -rf /usr/src/php*
 
-RUN apk add --no-cache supervisor htop tesseract-ocr
-
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/rus.traineddata && \
-    cp rus.traineddata /usr/share/tessdata/rus.traineddata
+RUN apk add --no-cache supervisor htop
 
 RUN mkdir -p /var/log/supervisor
 
@@ -57,9 +65,7 @@ RUN php --ri smbclient
 
 RUN apk add --no-cache $PHPIZE_DEPS
 RUN pecl install -o -f redis mongodb \
-    &&  rm -rf /tmp/pear \
-    &&  docker-php-ext-enable redis \
-    &&  docker-php-ext-enable mongodb
+    &&  rm -rf /tmp/pear
 
 RUN pecl install rar && \
     docker-php-ext-enable rar

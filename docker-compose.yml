@@ -162,7 +162,7 @@ services:
       - "9998:9998"
     networks:
       - backend
-    user: ${CURRENT_UID}
+    #user: ${CURRENT_UID}
 
   whisper:
     image: onerahmet/openai-whisper-asr-webservice
