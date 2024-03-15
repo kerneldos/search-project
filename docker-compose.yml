@@ -158,6 +158,8 @@ services:
     container_name: tika
     hostname: tika.local
     restart: unless-stopped
+    environment:
+      - OMP_THREAD_LIMIT=1
     ports:
       - "9998:9998"
     networks:
